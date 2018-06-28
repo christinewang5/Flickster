@@ -8,6 +8,9 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
+import com.codepath.flicks.models.Config;
+import com.codepath.flicks.models.GlideApp;
 import com.codepath.flicks.models.Movie;
 
 import java.util.ArrayList;
@@ -15,6 +18,13 @@ import java.util.ArrayList;
 public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.ViewHolder> {
     // list of movies
     ArrayList<Movie> movies;
+    // config needed for image urls
+    Config config;
+    // context for rendering
+    Context context;
+    public void setConfig(Config config) {
+        this.config = config;
+    }
 
     // initialize with list
     public MovieAdapter(ArrayList<Movie> movies) {
@@ -25,7 +35,7 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.ViewHolder> 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         // get the context and create the inflater
-        Context context = parent.getContext();
+        context = parent.getContext();
         LayoutInflater inflater = LayoutInflater.from(context);
         //create the view using the item_movie layout
         View movieView = inflater.inflate(R.layout.item_movie, parent, false);
@@ -35,14 +45,23 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.ViewHolder> 
 
     // binds an inflated view to a new item
     @Override
-    public void onBindViewHolder(ViewHolder viewHolder, int position) {
+    public void onBindViewHolder(ViewHolder holder, int position) {
         // get the movie data at a specified position
         Movie movie = movies.get(position);
         // populate the view with the movie data
-        viewHolder.tvTitle.setText(movie.getTitle());
-        viewHolder.tvOverview.setText(movie.getOverview());
+        holder.tvTitle.setText(movie.getTitle());
+        holder.tvOverview.setText(movie.getOverview());
 
-        // TODO - set image using Glide
+        // build url for poster image
+        String imageUrl = config.getImageUrl(config.getPosterSize(), movie.getPosterPath());
+
+        // load image using glide
+        GlideApp.with(context)
+                .load(imageUrl)
+                .transform(new RoundedCorners(15))
+                .error(R.drawable.flicks_movie_placeholder)
+                .into(holder.ivPosterImage);
+
     }
 
     // returns the total number of items in the list
