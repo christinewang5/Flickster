@@ -1,6 +1,8 @@
 package com.codepath.flicks;
 
 import android.content.Context;
+import android.content.res.Configuration;
+import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -8,12 +10,15 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
 import com.codepath.flicks.models.Config;
 import com.codepath.flicks.models.GlideApp;
 import com.codepath.flicks.models.Movie;
 
 import java.util.ArrayList;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import jp.wasabeef.glide.transformations.RoundedCornersTransformation;
 
 public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.ViewHolder> {
     // list of movies
@@ -52,16 +57,30 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.ViewHolder> 
         holder.tvTitle.setText(movie.getTitle());
         holder.tvOverview.setText(movie.getOverview());
 
+        // determine the current orientation
+        boolean isPortrait = context.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT;
+
         // build url for poster image
         String imageUrl = config.getImageUrl(config.getPosterSize(), movie.getPosterPath());
+
+        if (isPortrait) {
+            imageUrl = config.getImageUrl(config.getPosterSize(), movie.getPosterPath());
+        } else {
+            // load the backdrop image
+            imageUrl = config.getImageUrl(config.getBackdropSize(), movie.getBackdropPath());
+        }
+
+        // get the correct placeholder and imageview for the correct orientation
+        int placeholderId = isPortrait ? R.drawable.flicks_backdrop_placeholder : R.drawable.flicks_backdrop_placeholder;
+        ImageView imageView = isPortrait ? holder.ivPosterImage : holder.ivBackdropImage;
+
 
         // load image using glide
         GlideApp.with(context)
                 .load(imageUrl)
-                .transform(new RoundedCorners(15))
+                .transform(new RoundedCornersTransformation(25, 2))
                 .error(R.drawable.flicks_movie_placeholder)
-                .into(holder.ivPosterImage);
-
+                .into(imageView);
     }
 
     // returns the total number of items in the list
@@ -70,19 +89,18 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.ViewHolder> 
         return movies.size();
     }
 
-    // create the viewholder as a static inner class
+    // create the view holder as a static inner class
     public static class ViewHolder extends RecyclerView.ViewHolder {
         // track view objects
-        ImageView ivPosterImage;
-        TextView tvTitle;
-        TextView tvOverview;
+        @Nullable @BindView(R.id.ivPosterImage) ImageView ivPosterImage;
+        @Nullable @BindView(R.id.ivBackdropImage) ImageView ivBackdropImage;
+        @BindView(R.id.tvTitle) TextView tvTitle;
+        @BindView(R.id.tvOverview) TextView tvOverview;
 
         public ViewHolder(View itemView) {
             super(itemView);
             // lookup view objects by id
-            ivPosterImage = (ImageView) itemView.findViewById(R.id.ivPosterImage);
-            tvOverview = (TextView) itemView.findViewById(R.id.tvOverview);
-            tvTitle = (TextView) itemView.findViewById(R.id.tvTitle);
+            ButterKnife.bind(this, itemView);
         }
     }
 }
