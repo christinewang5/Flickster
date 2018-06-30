@@ -39,13 +39,14 @@ public class MovieListActivity extends AppCompatActivity {
     RecyclerView rvMovies;
     // the adapter wired to the recycler view
     MovieAdapter adapter;
-    // image config
+    // image configuration
     Config config;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_movie_list);
+
         //init client
         client = new AsyncHttpClient();
         // init movies

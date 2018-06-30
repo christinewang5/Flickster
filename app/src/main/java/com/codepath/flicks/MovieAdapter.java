@@ -26,10 +26,11 @@ import jp.wasabeef.glide.transformations.RoundedCornersTransformation;
 public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.ViewHolder> {
     // list of movies
     ArrayList<Movie> movies;
-    // config needed for image urls
-    Config config;
+    // configuration needed for image urls
+    public Config config;
     // context for rendering
     Context context;
+
     public void setConfig(Config config) {
         this.config = config;
     }
@@ -64,19 +65,10 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.ViewHolder> 
         boolean isPortrait = context.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT;
 
         // build url for poster image
-        String imageUrl = config.getImageUrl(config.getPosterSize(), movie.getPosterPath());
+        String imageUrl = isPortrait ? config.getImageUrl(config.getPosterSize(), movie.getPosterPath()) : config.getImageUrl(config.getBackdropSize(), movie.getBackdropPath());
 
-        if (isPortrait) {
-            imageUrl = config.getImageUrl(config.getPosterSize(), movie.getPosterPath());
-        } else {
-            // load the backdrop image
-            imageUrl = config.getImageUrl(config.getBackdropSize(), movie.getBackdropPath());
-        }
-
-        // get the correct placeholder and imageview for the correct orientation
-        int placeholderId = isPortrait ? R.drawable.flicks_backdrop_placeholder : R.drawable.flicks_backdrop_placeholder;
+        // get the correct placeholder and image view for the correct orientation
         ImageView imageView = isPortrait ? holder.ivPosterImage : holder.ivBackdropImage;
-
 
         // load image using glide
         GlideApp.with(context)
@@ -119,6 +111,7 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.ViewHolder> 
                 Intent intent = new Intent(context, MovieDetailsActivity.class);
                 // serialize the movie using parceler, use its short name as a key
                 intent.putExtra(Movie.class.getSimpleName(), Parcels.wrap(movie));
+                //intent.putExtra(Movie.class.getSimpleName(), Parcels.wrap(config));
                 // show the activity
                 context.startActivity(intent);
             }
